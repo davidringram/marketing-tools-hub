@@ -1,17 +1,167 @@
 ---
+import DashboardLayout from '../layouts/DashboardLayout.astro';
+import { getCollection } from 'astro:content';
 
+const allTools = await getCollection('tools');
+
+// 1. DEFINE YOUR CUSTOM ORDER HERE
+// This controls which buckets appear first.
+const CUSTOM_ORDER = [ 
+  
+  'Ads', 
+  'AI',
+  'Analytics',
+  'Automation', 
+  'Content Creation', 
+  'CRO',
+  'Email',  
+  'SEO',
+  'Social',   
+  'Project Management', 
+  'Video/Audio', 
+  'Graphic Design',
+  'Web Dev', 
+  'Admin',
+  'Ops'            
+];
+
+// 2. Group by Bucket
+const rawBuckets = allTools.reduce((acc, tool) => {
+  const bucket = tool.data.bucket;
+  if (!acc[bucket]) acc[bucket] = [];
+  acc[bucket].push(tool);
+  return acc;
+}, {});
+
+// 3. Sort the Buckets based on your list
+// This creates an ARRAY of [bucketName, toolsArray] pairs
+const sortedBuckets = Object.entries(rawBuckets).sort((a, b) => {
+  const indexA = CUSTOM_ORDER.indexOf(a[0]);
+  const indexB = CUSTOM_ORDER.indexOf(b[0]);
+  
+  // If a bucket isn't in the list, push it to the end
+  const valA = indexA === -1 ? Infinity : indexA;
+  const valB = indexB === -1 ? Infinity : indexB;
+  
+  return valA - valB;
+});
+
+// 4. Extract names for the sidebar
+const bucketList = sortedBuckets.map(([name]) => name);
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<DashboardLayout buckets={bucketList}>
+    
+    <div 
+        x-data="{ 
+            query: ''
+        }" 
+        /* HOTKEYS: Press '/' to focus, 'Esc' to clear */
+        x-on:keydown.window.slash.prevent="$refs.searchInput.focus()"
+        x-on:keydown.window.escape="query = ''; $refs.searchInput.blur()"
+        class="min-h-screen relative z-10"
+    >
+        
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+                Mission Control
+            </h1>
+            
+            <div class="relative w-full md:w-96">
+                <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                    </svg>
+                </div>
+                <input 
+                    type="text" 
+                    x-ref="searchInput"
+                    x-model="query"
+                    class="block w-full p-2.5 ps-10 text-sm text-gray-900 border border-gray-300 rounded-sm bg-gray-50/50 backdrop-blur-sm focus:ring-accent-bright focus:border-accent-bright dark:bg-gray-800/50 dark:border-primary-700 dark:placeholder-gray-400 dark:text-white dark:focus:ring-accent-bright dark:focus:border-accent-bright font-mono" 
+                    placeholder="SEARCH TOOLS... (Press '/')" 
+                />
+            </div>
+        </div>
+
+        {sortedBuckets.map(([bucket, tools]) => (
+            <div 
+                id={bucket} 
+                class="mb-6 border border-gray-200 dark:border-primary-800 rounded-sm overflow-hidden bg-white/90 dark:bg-gray-900/80 backdrop-blur-sm"
+                x-data="{ open: true }"
+            >
+                <button 
+                    @click="open = !open" 
+                    class="w-full flex justify-between items-center p-4 bg-gray-50/50 dark:bg-primary-900/40 hover:bg-gray-100 dark:hover:bg-primary-900/60 transition-colors border-b border-gray-200 dark:border-primary-800"
+                >
+                    <div class="flex items-center gap-3">
+                        <h2 class="text-lg font-bold text-gray-700 dark:text-gray-200 uppercase tracking-widest">
+                            {bucket}
+                        </h2>
+                        <span class="bg-primary-100 text-primary-800 text-xs font-mono font-medium me-2 px-2.5 py-0.5 rounded dark:bg-primary-800 dark:text-primary-100 border border-primary-200 dark:border-primary-700">
+                            {tools.length}
+                        </span>
+                    </div>
+                    
+                    <svg 
+                        class="w-4 h-4 text-gray-500 transition-transform duration-200" 
+                        :class="open ? 'rotate-180' : ''"
+                        aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6"
+                    >
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
+                    </svg>
+                </button>
+
+                <div x-show="open" x-collapse class="p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {tools.map((tool) => (
+                            <a 
+                                href={tool.data.url} 
+                                target="_blank" 
+                                /* IMPORTANT: We attach the name here so Alpine can read it */
+                                data-name={tool.data.name}
+                                class="relative group block max-w-sm p-5 bg-white/50 dark:bg-gray-900/50 backdrop-blur-md border border-gray-200 rounded-sm shadow-sm hover:shadow-md dark:border-primary-700 dark:hover:border-accent-bright transition-all duration-200"
+                                /* THE LOGIC: Show if query is empty OR if name contains query */
+                                x-show="!query || $el.dataset.name.toLowerCase().includes(query.toLowerCase())"
+                            >
+                                <div class="flex justify-between items-start mb-2">
+                                    <h5 class="text-lg font-bold tracking-tight text-gray-900 dark:text-gray-100 group-hover:text-accent-bright transition-colors">
+                                        {tool.data.name}
+                                    </h5>
+                                    
+                                    <div class="flex items-center gap-2">
+                                        <span class="relative flex h-2 w-2">
+                                          <span class={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                                            (tool.data.company || 'DIM&C') === 'DIM&C' ? 'bg-primary-400' : 'bg-gray-400'
+                                          }`}></span>
+                                          <span class={`relative inline-flex rounded-full h-2 w-2 ${
+                                            (tool.data.company || 'DIM&C') === 'DIM&C' ? 'bg-primary-500' : 'bg-gray-500'
+                                          }`}></span>
+                                        </span>
+
+                                        <span class={`text-[10px] font-mono font-medium px-1.5 py-0.5 rounded border ${
+                                            (tool.data.company || 'DIM&C') === 'DIM&C' 
+                                            ? 'bg-primary-900/50 text-primary-100 border-primary-700 backdrop-blur-sm' 
+                                            : 'bg-gray-100/50 text-gray-800 border-gray-300 dark:bg-gray-700/50 dark:text-gray-300 dark:border-gray-600 backdrop-blur-sm'
+                                        }`}>
+                                            {(tool.data.company || 'Unknown').toUpperCase()}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <p class="font-normal text-gray-600 dark:text-gray-400 text-xs mb-3 line-clamp-2">
+                                    {tool.data.description}
+                                </p>
+
+                                <div class="flex items-center justify-between border-t border-gray-100 dark:border-primary-800 pt-2 mt-2">
+                                    <span class="text-xs font-mono font-bold text-accent dark:text-accent-DEFAULT">
+                                        {tool.data.cost}
+                                    </span>
+                                </div>
+                            </a>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        ))}
+    </div>
+</DashboardLayout>
