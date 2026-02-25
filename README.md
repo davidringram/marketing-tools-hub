@@ -1,43 +1,42 @@
-# Astro Starter Kit: Minimal
+# 🦅 fCMO Tactical Command Center
 
-```sh
-npm create astro@latest -- --template minimal
-```
+> **Mission Control for Fractional CMOs.** A high-speed, zero-database dashboard to track marketing stacks, software allocations, and tech costs across multiple client portfolios.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Built for speed and clarity, this dashboard replaces bloated spreadsheets with a "Heads-Up Display" (HUD) featuring instant search, tactical aesthetics, and secure client-gating.
 
-## 🚀 Project Structure
+## 🚀 Core Features
 
-Inside of your Astro project, you'll see the following folders and files:
+- **Zero-Database Architecture:** Powered entirely by local Markdown files and Astro Content Collections.
+- **Rapid Data Ingestion:** Uses a custom Python script to instantly convert a standard `.csv` file into a fully routed database.
+- **Tactical HUD UI:** "Dusty Olive" and "Safety Orange" color palette with grid-mapped backgrounds, glassmorphism cards, and live-pulse status indicators.
+- **Instant Filtering:** Alpine.js powers a blazing-fast, client-side search engine. (Press `/` to engage).
+- **Secure Access:** Protected by Clerk middleware to ensure client tech stacks remain confidential.
+
+## 🛠️ The Tech Stack
+
+- **Framework:** [Astro 5](https://astro.build/) (Server-Side Rendered)
+- **Styling:** [Tailwind CSS v3](https://tailwindcss.com/) + [Flowbite](https://flowbite.com/)
+- **Interactivity:** [Alpine.js](https://alpinejs.dev/) (CDN injected)
+- **Authentication:** [Clerk](https://clerk.com/)
+- **Data Pipeline:** Python (via `uv`)
+
+## 📂 Project Structure
 
 ```text
 /
-├── public/
+├── public/                 # Static assets (favicons, logos)
 ├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+│   ├── content/
+│   │   ├── tools/          # AUTO-GENERATED: Markdown files for each tool
+│   │   └── config.ts       # THE LAW: Defines Zod schemas and valid Buckets
+│   ├── layouts/
+│   │   └── DashboardLayout.astro  # The main UI shell and sidebar
+│   ├── pages/
+│   │   └── index.astro     # The Command Center UI and Search Logic
+│   ├── styles/
+│   │   └── global.css      # Tailwind directives
+│   └── middleware.ts       # Clerk Auth Gatekeeper
+├── tools.csv               # THE SOURCE: Your master spreadsheet
+├── import_tools.py         # THE ENGINE: Python script that reads the CSV
+└── tailwind.config.mjs     # Custom tactical color palette
 ```
-
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
